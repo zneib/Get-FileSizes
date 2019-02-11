@@ -1,4 +1,4 @@
-﻿<#	
+<#
 	.NAME
 		Get-FileSizes
 	.DESCRIPTION
@@ -8,22 +8,18 @@
 
 		13.36GB
 	.EXAMPLE
-		Get-FileSizes -FilePath C:\$env:USERNAME\Downloads\ -FullList
+		Get-FileSizes -FilePath C:\AppLauncher\ -FullList
 
-		13.36GB
-		C:\Users\Zachn\Downloads\ -- 13.36GB
-		C:\Users\Zachn\Downloads\10514.0.150808-1529.TH2_RELEASE_SERVER_OEMRET_X64FRE_EN-US (1).ISO -- 4.62GB
-		C:\Users\Zachn\Downloads\dark-bliss.vssettings -- 7.95KB
-		C:\Users\Zachn\Downloads\en_visual_studio_team_foundation_server_2013_with_update_4_x86_x64_dvd_5921289.iso -- 2.46GB
-		C:\Users\Zachn\Downloads\en_visual_studio_team_foundation_server_2013_with_update_5_x86_x64_dvd_6815779.iso -- 2.46GB
-		C:\Users\Zachn\Downloads\en_windows_10_enterprise_x64_dvd_6851151.iso -- 3.67GB
-		C:\Users\Zachn\Downloads\Microsoft_Press_ebook_Introducing_Microsoft_SQL_Server_2014_PDF.pdf -- 8.09MB
-		C:\Users\Zachn\Downloads\Microsoft_Press_eBook_Introducing_Windows_10_Preview_PDF.pdf -- 6.39MB
-		C:\Users\Zachn\Downloads\Microsoft_Press_ebook_Introducing_Windows_ITPro_PDF.pdf -- 9.31MB
-		C:\Users\Zachn\Downloads\Microsoft_Press_ebook_Introducing_Windows_Server_2012_R2_PDF.pdf -- 11.21MB
-		C:\Users\Zachn\Downloads\powershellorg-secrets-of-powershell-remoting-master.pdf -- 433.08KB
-		C:\Users\Zachn\Downloads\ScriptingCMF.zip -- 65.10KB
-		C:\Users\Zachn\Downloads\Sublime Text 2.0.2 x64 Setup.exe -- 6.21MB	
+		1.30MB
+		C:\AppLauncher\AppLauncher.exe -- 263.00KB
+		C:\AppLauncher\AppLauncher.exe.config -- 0.33KB
+		C:\AppLauncher\AppLauncher.pdb -- 53.50KB
+		C:\AppLauncher\CIM 7.1 Latest Build -- 155.00KB
+		C:\AppLauncher\Instructions on Updating the App Launcher.docx -- 858.17KB
+	.EXAMPLE
+	  Get-FileSizes
+
+		16.66KB
 #>
 
 function Get-FileSizes
@@ -33,77 +29,95 @@ function Get-FileSizes
 		[string]$FilePath,
 		[switch]$FullList
 	)
-	
-		$items = (Get-ChildItem -Path $FilePath -Recurse | Measure-Object -Property Length -Sum)
-		if ($items.Sum -ge 1000000000)
-		{
-			$Size = "1GB"
-			$displayValue = "{0:N2}" -f ($items.Sum / $Size) + $Size.Substring(1, 2)
-			Write-Host $displayValue -ForegroundColor Cyan
-		}
-		elseif ($items.Sum -lt 1000000000 -and $items.Sum -gt 1000000)
-		{
-			$Size = "1MB"
-			$displayValue = "{0:N2}" -f ($items.Sum / $Size) + $Size.Substring(1, 2)
-			Write-Host $displayValue -ForegroundColor Yellow
-		}
-		elseif ($items.Sum -lt 1000000)
-		{
-			$Size = "1KB"
-			$displayValue = "{0:N2}" -f ($items.Sum / $Size) + $Size.Substring(1, 2)
-			Write-Host $displayValue -ForegroundColor Green
-		}
-		else
-		{
-			Write-Host "No size for files specified."
-		}
-	
-	
+
+	$items = (Get-ChildItem -Path $FilePath -Recurse | Measure-Object -Property Length -Sum)
+	if ($items.Sum -ge 1000000000)
+	{
+		$Size = "1GB"
+		$displayValue = "{0:N2}" -f ($items.Sum / $Size) + $Size.Substring(1, 2)
+		Write-Host $displayValue -ForegroundColor Red
+	}
+	elseif ($items.Sum -lt 1000000000 -and $items.Sum -gt 1000000)
+	{
+		$Size = "1MB"
+		$displayValue = "{0:N2}" -f ($items.Sum / $Size) + $Size.Substring(1, 2)
+		Write-Host $displayValue -ForegroundColor Green
+	}
+	elseif ($items.Sum -lt 1000000)
+	{
+		$Size = "1KB"
+		$displayValue = "{0:N2}" -f ($items.Sum / $Size) + $Size.Substring(1, 2)
+		Write-Host $displayValue  -ForegroundColor Gray
+	}
+	else
+	{
+		Write-Host "No size for files specified."
+	}
+
+
 	# Add a parameter that will show the sizes of all the files in a folder.
 	if ($FullList)
 	{
 		$startFolder = $FilePath
-		
-		$folderItems = (Get-ChildItem -Path $startFolder | Measure-Object -Property Length -Sum)
-		"$startFolder -- " + "{0:N2}" -f ($items.Sum / $Size) + $Size.Substring(1, 2)
-		
-		$folderItems = (Get-ChildItem $startFolder | Where-Object { !$_.PSIsContainer -eq $True } | Sort-Object)
-		foreach ($i in $folderItems)
+		if (!$FilePath) {
+			$startFolder = Get-Location
+		}
+
+		#Variable used to hold an array of folder items.
+		$folderItems = (Get-ChildItem -Directory $startFolder | Sort-Object)
+		foreach ($f in $folderItems)
+		{
+			$subFolderItems = (Get-ChildItem $f.FullName -Recurse | Measure-Object -Property Length -sum)
+
+			if ($subFolderItems.Sum -ge 1000000000)
+			{
+				$Size = "1GB"
+				$display = $f.FullName + " -- " + "{0:N2}" -f ($subFolderItems.sum / $Size) + $Size.Substring(1, 2)
+				Write-Host "Folder: "$display -ForegroundColor Red
+			}
+			elseif ($subFolderItems.Sum -lt 1000000000 -and $subFolderItems.Sum -gt 1000000)
+			{
+				$Size = "1MB"
+				$display = $f.FullName + " -- " + "{0:N2}" -f ($subFolderItems.sum / $Size) + $Size.Substring(1, 2)
+				Write-Host "Folder: "$display -ForegroundColor Green
+			}
+			elseif ($subFolderItems.Sum -lt 1000000)
+			{
+				$Size = "1KB"
+				$display = $f.FullName + " -- " + "{0:N2}" -f ($subFolderItems.sum / $Size) + $Size.Substring(1, 2)
+				Write-Host "Folder: "$display -ForegroundColor Gray
+			}
+		}
+
+		#Variable used to hold an array of file items.
+		$fileItems = (Get-ChildItem -File $startFolder | Sort-Object)
+		foreach ($i in $fileItems)
 		{
 			if ($i.Length -ge 1000000000)
 			{
 				$Size = "1GB"
-				$subFolderItems = (Get-ChildItem $i.FullName | Measure-Object -property length -sum)
-				$displayValue = $i.FullName + " -- " + "{0:N2}" -f ($subFolderItems.sum / $Size) + $Size.Substring(1, 2)
-				Write-Host $displayValue -ForegroundColor Cyan
+				$subFileItems = (Get-ChildItem $i.FullName | Measure-Object -Property Length -sum)
+				$displayValue = $i.FullName + " -- " + "{0:N2}" -f ($subFileItems.sum / $Size) + $Size.Substring(1, 2)
+				Write-Host $displayValue -ForegroundColor Red
 			}
 			elseif ($i.Length -lt 1000000000 -and $i.Length -gt 1000000)
 			{
 				$Size = "1MB"
-				$subFolderItems = (Get-ChildItem $i.FullName | Measure-Object -property length -sum)
-				$displayValue = $i.FullName + " -- " + "{0:N2}" -f ($subFolderItems.sum / $Size) + $Size.Substring(1, 2)
-				Write-Host $displayValue -ForegroundColor Yellow
+				$subFileItems = (Get-ChildItem $i.FullName | Measure-Object -Property Length -sum)
+				$displayValue = $i.FullName + " -- " + "{0:N2}" -f ($subFileItems.sum / $Size) + $Size.Substring(1, 2)
+				Write-Host $displayValue -ForegroundColor Green
 			}
 			elseif ($i.Length -lt 1000000)
 			{
 				$Size = "1KB"
-				$subFolderItems = (Get-ChildItem $i.FullName | Measure-Object -property length -sum)
-				$displayValue = $i.FullName + " -- " + "{0:N2}" -f ($subFolderItems.sum / $Size) + $Size.Substring(1, 2)
-				Write-Host $displayValue -ForegroundColor Green
+				$subFileItems = (Get-ChildItem $i.FullName | Measure-Object -Property Length -sum)
+				$displayValue = $i.FullName + " -- " + "{0:N2}" -f ($subFileItems.sum / $Size) + $Size.Substring(1, 2)
+				Write-Host $displayValue  -ForegroundColor Gray
 			}
 			else
 			{
 				Write-Host "No size for files specified."
 			}
-			#$subFolderItems = (Get-ChildItem $i.FullName | Measure-Object -property length -sum)
-			#$i.FullName + " -- " + "{0:N2}" -f ($subFolderItems.sum / 1MB) + " MB"
 		}
 	}
-	
-	
 }
-
-
-
-
-
