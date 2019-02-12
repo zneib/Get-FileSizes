@@ -72,19 +72,19 @@ function Get-FileSizes
 			if ($subFolderItems.Sum -ge 1000000000)
 			{
 				$Size = "1GB"
-				$display = $f.FullName + " -- " + "{0:N2}" -f ($subFolderItems.sum / $Size) + $Size.Substring(1, 2)
+				$display = $f.Name + " -- " + "{0:N2}" -f ($subFolderItems.sum / $Size) + $Size.Substring(1, 2)
 				Write-Host "Folder: "$display -ForegroundColor Red
 			}
 			elseif ($subFolderItems.Sum -lt 1000000000 -and $subFolderItems.Sum -gt 1000000)
 			{
 				$Size = "1MB"
-				$display = $f.FullName + " -- " + "{0:N2}" -f ($subFolderItems.sum / $Size) + $Size.Substring(1, 2)
+				$display = $f.Name + " -- " + "{0:N2}" -f ($subFolderItems.sum / $Size) + $Size.Substring(1, 2)
 				Write-Host "Folder: "$display -ForegroundColor Green
 			}
 			elseif ($subFolderItems.Sum -lt 1000000)
 			{
 				$Size = "1KB"
-				$display = $f.FullName + " -- " + "{0:N2}" -f ($subFolderItems.sum / $Size) + $Size.Substring(1, 2)
+				$display = $f.Name + " -- " + "{0:N2}" -f ($subFolderItems.sum / $Size) + $Size.Substring(1, 2)
 				Write-Host "Folder: "$display -ForegroundColor Gray
 			}
 		}
@@ -97,21 +97,21 @@ function Get-FileSizes
 			{
 				$Size = "1GB"
 				$subFileItems = (Get-ChildItem $i.FullName | Measure-Object -Property Length -sum)
-				$displayValue = $i.FullName + " -- " + "{0:N2}" -f ($subFileItems.sum / $Size) + $Size.Substring(1, 2)
+				$displayValue = $i.Name + " -- " + "{0:N2}" -f ($subFileItems.sum / $Size) + $Size.Substring(1, 2)
 				Write-Host $displayValue -ForegroundColor Red
 			}
 			elseif ($i.Length -lt 1000000000 -and $i.Length -gt 1000000)
 			{
 				$Size = "1MB"
 				$subFileItems = (Get-ChildItem $i.FullName | Measure-Object -Property Length -sum)
-				$displayValue = $i.FullName + " -- " + "{0:N2}" -f ($subFileItems.sum / $Size) + $Size.Substring(1, 2)
+				$displayValue = $i.Name + " -- " + "{0:N2}" -f ($subFileItems.sum / $Size) + $Size.Substring(1, 2)
 				Write-Host $displayValue -ForegroundColor Green
 			}
 			elseif ($i.Length -lt 1000000)
 			{
 				$Size = "1KB"
 				$subFileItems = (Get-ChildItem $i.FullName | Measure-Object -Property Length -sum)
-				$displayValue = $i.FullName + " -- " + "{0:N2}" -f ($subFileItems.sum / $Size) + $Size.Substring(1, 2)
+				$displayValue = $i.Name + " -- " + "{0:N2}" -f ($subFileItems.sum / $Size) + $Size.Substring(1, 2)
 				Write-Host $displayValue  -ForegroundColor Gray
 			}
 			else
